@@ -8,6 +8,7 @@ const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const customerRoutes = require('./routes/customerRoutes');
+const { errorHandler } = require('./middleware/errorHandler');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
+app.use(errorHandler);
 
 // Routes
 app.use('/api/admin', adminRoutes);
@@ -39,6 +41,7 @@ app.get('/', (req, res) => {
 // Connect to MongoDB
 const startServer = async () => {
   try {
+    
     await mongoose.connect('mongodb://127.0.0.1:27017/ecommerce');
    /*await mongoose.connect(`${process.env.MONGODB_URI}/ecommerce`, {
       useNewUrlParser: true,

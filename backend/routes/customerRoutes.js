@@ -35,4 +35,40 @@ router.post('/order', authenticate, async (req, res) => {
   }
 });
 
+// Browse all products with pagination and filtering
+router.get('/products', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', minPrice, maxPrice } = req.query;
+
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    if (minPrice) {
+      query.price = { ...query.price, $gte: parseInt(minPrice) };
+    }
+
+    if (maxPrice) {
+      query.price = { ...query.price, $lte: parseInt(maxPrice) };
+    }
+
+    const products = await Product.find(query)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Product.countDocuments(query);
+
+    res.status(200).json({
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error.', error: error.message });
+  }
+});
+
 module.exports = router;
